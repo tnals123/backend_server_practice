@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="text-align: center">
+    <h1>게시물 상세보기</h1>
+
+    <section>
+        <p id = "postUser"></p>
+        <p id = "postDate"></p>
+        <p id = "postContents"></p>
+    </section>
+
+    <script>
+
+        const postUser = document.getElementById("postUser")
+        const postDate = document.getElementById("postDate")
+        const postContents = document.getElementById("postContents")
+
+        const postNum = location.pathname.split('/')[location.pathname.split('/').length-1]
+        console.log(postNum)
+
+        const getDetailPost = async () => {
+
+            const getPost = await fetch("/post/getData/Detail",{
+                "method" : "POST",
+                "headers" : {
+                    "Content-Type" : "application/json" 
+                },
+                "body" : JSON.stringify({
+                    "postNum" : postNum,
+                })
+            })
+
+            const response = await getPost.json()
+            console.log(response.postList[0])
+
+            postUser.innerHTML = "작성자 : " + response.postList[0].postUserId
+            postDate.innerHTML = "작성일 : " + response.postList[0].postDATE
+            postContents.innerHTML = "글 : " + response.postList[0].postContents
+
+            console.log(response)
+
+        }
+
+        getDetailPost()
+
+    </script>
+    
+</body>
+</html>

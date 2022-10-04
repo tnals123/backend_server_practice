@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="text-align: center">
+    <h1>게시물 페이지입니다</h1>
+    <input type="button" value="로그아웃" onclick="location.href = '/logout'">
+    <input type="button" value="게시물 작성" onclick = writePost()>
+    <section id = "mainSection" style="text-align: center">
+
+    </section>
+
+    <script>
+
+        const getSession = async () =>{
+
+            const getSession = await fetch("/confirmSession",{
+                method : "GET"
+            })
+
+            const response = await getSession.json()
+            console.log(response)
+
+            if (response != undefined){
+                console.log(response)
+                getAllPost(response.userId)
+            }
+
+        }
+
+        const getAllPost = async (userId) => {
+
+            const mainSection = document.getElementById("mainSection")
+
+            const getPost = await fetch("/post/getData",{
+                method : "GET"
+            })
+
+            const response = await getPost.json()
+
+            if (response.postList.length == 0){
+                mainSection.value = "작성된 게시물이 없습니다."
+            }
+            else{
+                for (let i = 0 ; i<response.postList.length; i++){
+
+                    const newLine = document.createElement("br")
+                    let postFrame = document.createElement('p')
+                    let writerFrame = document.createElement('p')
+                    let deleteBtn = document.createElement('input')
+                    let alterBtn = document.createElement('input')
+                    let cancelBtn = document.createElement('input')
+                    let alterTextArea = document.createElement('textarea')
+                    let postUserNick = document.createTextNode(`작성자 : ${response.postList[i].postUserId}`)
+                    let postContent = document.createElement('p')
+                    let postDate = document.createTextNode(`\n${response.postList[i].postDate}`)
+
+                    deleteBtn.type = 'button';
+                    deleteBtn.value = "X"
+                    deleteBtn.style = "color:white;border-radius : 22px; width : 30px; background : red; margin-left : 330px;"
+                    alterBtn.type = 'button';
+                    alterBtn.value = "수정"
+                    alterBtn.style = "color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                    cancelBtn.type = 'button';
+                    cancelBtn.value = "취소"
+                    cancelBtn.style = "display : none; color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                    alterTextArea.style = "display: none; position : absolute; width : 600px; right : 120px; height: 60px"
+                    alterTextArea.id = "alterTextArea"
+                    postContent.innerHTML = `\n${response.postList[i].postContents}`
+
+                    postContent.onclick = () => {
+                            location.href = `/postDetail/${response.postList[i].postNum}`
+                    }
+                    
+                    deleteBtn.onclick = () => {
+                        console.log(response.postList[i].postNum)
+                        deletePost(response.postList[i].postNum)
+                    }
+
+                    cancelBtn.onclick = () => {
+                        alterTextArea.style = "display: none; position : absolute; width : 600px; right : 120px; height: 60px"
+                        cancelBtn.style = "display : none; color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                        alterBtn.value = "수정"
+
+                    }
+
+                    alterBtn.onclick = () => {
+                        if (alterBtn.value == "수정"){
+                            alterBtn.value = "적용"
+                            alterTextArea.style = "display: inline; position : absolute; width : 600px; right : 120px; height: 60px"
+                            cancelBtn.style = "display : inline; color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                        }
+                        else{
+                            let newpostContents = alterTextArea.value
+                            updatePost(newpostContents,response.postList[i].postNum)
+                        }
+
+                    }
+
+                    postFrame.style = "margin-left:auto; margin-right:auto; backgroundColor : grey; margin-bottom : 20px; padding : 10px 30px; width : 600px; box-shadow: 5px 5px 5px 5px gray; height : 120px "
+                    
+
+                    writerFrame.appendChild(postUserNick)
+                    if (userId == response.postList[i].postUserId){
+                        writerFrame.appendChild(deleteBtn)
+                        writerFrame.appendChild(alterBtn)
+                        writerFrame.appendChild(cancelBtn)
+                    }
+                    
+                    postFrame.appendChild(writerFrame)
+
+                    postFrame.appendChild(alterTextArea)
+
+                    postFrame.appendChild(newLine)
+                    postFrame.appendChild(postContent)
+
+                    mainSection.appendChild(postFrame)
+                }
+            }
+
+        }
+
+        const deletePost = async (postNum) => {
+
+            const postDelete = await fetch("/post/delete",{
+                "method" : "DELETE",
+                "headers" : {
+                    "Content-Type" : "application/json" 
+                },
+                "body" : JSON.stringify({
+                    "postNum" : postNum,
+                })
+            })
+
+            const response = await postDelete.json()
+            
+            if (response.success == true){
+                alert("삭제 완료!")
+                location.href = "/postPage"
+            }
+
+        }
+
+        
+        const updatePost = async (newpostContents, postNum) => {
+
+            const postDelete = await fetch("/post/update",{
+                "method" : "PUT",
+                "headers" : {
+                    "Content-Type" : "application/json" 
+                },
+                "body" : JSON.stringify({
+                    "newpostContents" : newpostContents,
+                    "postNum" : postNum,
+                })
+            })
+
+            const response = await postDelete.json()
+
+            if (response.success == true){
+                alert("수정!")
+                location.href = "/postPage"
+            }
+
+        }
+
+        getSession()
+
+        const writePost = () => {
+            location.href = "/post/new"
+        }
+    </script>
+    
+</body>
+</html>

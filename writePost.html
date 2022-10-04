@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="text-align: center">
+    <h1>게시물 작성</h1>
+
+    <textarea id = "textField" style="text-align: center; width:600px; height: 300px;">
+
+    </textarea>
+
+    <br>
+
+    <input type="button" value="게시물 작성" onclick="getSession()" >
+
+    <script>
+
+        const getSession = async () =>{
+
+            const getSession = await fetch("/confirmSession",{
+                method : "GET"
+            })
+
+            const response = await getSession.json()
+            console.log(response)
+
+            if (response != undefined){
+                console.log(response)
+                idCheckResult(response.userId)
+            }
+
+        }
+
+        const idCheckResult = async (userId) => {
+
+            const textValue = document.getElementById("textField").value
+
+            const writePost = await fetch("/post/writePost/write",{
+                "method" : "POST",
+                "headers" : {
+                    "Content-Type" : "application/json" 
+                },
+                "body" : JSON.stringify({
+                    "idValue" : userId,
+                    "postContents" : textValue,
+                    "postDate" : new Date().getHours() + "시" + new Date().getMinutes() + "분"
+                })
+            })
+
+            const response = await writePost.json()
+            
+            if (response.success == true){
+                alert("게시글 작성!")
+                // location.href = "/makeSesstion"
+                location.href = "/postPage"
+            }
+
+        }
+
+
+
+    </script>
+    
+</body>
+</html>
