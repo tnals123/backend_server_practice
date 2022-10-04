@@ -18,7 +18,7 @@
 
         const getSession = async () =>{
 
-            const getSession = await fetch("/confirmSession",{
+            const getSession = await fetch("/session",{
                 method : "GET"
             })
 
@@ -36,17 +36,19 @@
 
             const mainSection = document.getElementById("mainSection")
 
-            const getPost = await fetch("/post/getData",{
+            const getPost = await fetch("/post",{
                 method : "GET"
             })
 
             const response = await getPost.json()
 
-            if (response.postList.length == 0){
+            console.log(response.posts)
+
+            if (response.posts.length == 0){
                 mainSection.value = "작성된 게시물이 없습니다."
             }
             else{
-                for (let i = 0 ; i<response.postList.length; i++){
+                for (let i = 0 ; i<response.posts.length; i++){
 
                     const newLine = document.createElement("br")
                     let postFrame = document.createElement('p')
@@ -55,9 +57,9 @@
                     let alterBtn = document.createElement('input')
                     let cancelBtn = document.createElement('input')
                     let alterTextArea = document.createElement('textarea')
-                    let postUserNick = document.createTextNode(`작성자 : ${response.postList[i].postUserId}`)
+                    let postUserNick = document.createTextNode(`작성자 : ${response.posts[i].userid}`)
                     let postContent = document.createElement('p')
-                    let postDate = document.createTextNode(`\n${response.postList[i].postDate}`)
+                    let postDate = document.createTextNode(`\n${response.posts[i].postdate}`)
 
                     deleteBtn.type = 'button';
                     deleteBtn.value = "X"
@@ -70,15 +72,15 @@
                     cancelBtn.style = "display : none; color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
                     alterTextArea.style = "display: none; position : absolute; width : 600px; right : 120px; height: 60px"
                     alterTextArea.id = "alterTextArea"
-                    postContent.innerHTML = `\n${response.postList[i].postContents}`
+                    postContent.innerHTML = `\n${response.posts[i].postcontents}`
 
                     postContent.onclick = () => {
-                            location.href = `/postDetail/${response.postList[i].postNum}`
+                            location.href = `/postDetail/${response.posts[i].postnum}`
                     }
                     
                     deleteBtn.onclick = () => {
-                        console.log(response.postList[i].postNum)
-                        deletePost(response.postList[i].postNum)
+                        console.log(response.posts.postNum)
+                        deletePost(response.posts.postNum)
                     }
 
                     cancelBtn.onclick = () => {
@@ -105,7 +107,7 @@
                     
 
                     writerFrame.appendChild(postUserNick)
-                    if (userId == response.postList[i].postUserId){
+                    if (userId == response.posts[i].userid){
                         writerFrame.appendChild(deleteBtn)
                         writerFrame.appendChild(alterBtn)
                         writerFrame.appendChild(cancelBtn)

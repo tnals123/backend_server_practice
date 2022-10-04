@@ -16,10 +16,12 @@
 
         const getSession = async () =>{
 
+            console.log("123132213131")
+
             const idValue = document.getElementById("idValue")
             const pwValue = document.getElementById("pwValue")
 
-            const getSession = await fetch("/confirmSession",{
+            const getSession = await fetch("/session",{
                 method : "GET"
             })
         

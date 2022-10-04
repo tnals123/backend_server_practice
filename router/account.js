@@ -19,7 +19,19 @@ const client = require('../config/database')
 
 // })
 
+account.get("/session",(req,res)=>{
+    console.log("zzzzz")
+    if(req.session.user){
+        console.log(req.session.user)
+        res.send(req.session.user)
+    }
+    else{
+    }
+})
+
 account.post("/account/idCheck",(req,res) => {
+
+    console.log(session)
 
     const idValue = req.body.id
 
@@ -28,28 +40,20 @@ account.post("/account/idCheck",(req,res) => {
 
     client.query(sql,values, (err,data) => {
 
-        let isSuccess = {
+        let result = {
             "success" : false,
         }
 
-        if (err) {
-            console.log(err)
-            res.send(isSuccess)
-            return
+        const row = data.rows
+        if (row.length != 0){
+            //아이디가 이미 존재
+            result.success = true
+            res.send(result)
         }
-
         else{
-            const row = data.rows
-            if (row.length != 0){
-                //아이디가 이미 존재
-                isSuccess.success = true
-                res.send(isSuccess)
-            }
-            else{
-                //아이디가 존재하지 않음
-                isSuccess.success = false
-                res.send(isSuccess)
-            }
+            //아이디가 존재하지 않음
+            result.success = false
+            res.send(result)
         }
 
     })
@@ -67,19 +71,19 @@ account.post("/account/resister",(req,res)=>{
 
     client.query(sql,values,(err,data) => {
         
-        let isSuccess = {
+        let result = {
             success : false
         }
 
         if (err) {
             console.log(err)
-            isSuccess.success = false
-            res.send(isSuccess)
+            result.success = false
+            res.send(result)
             return
         }
         else{
-            isSuccess.success = true
-            res.send(isSuccess)
+            result.success = true
+            res.send(result)
         }
     })
     
@@ -90,40 +94,29 @@ account.post("/account/login", (req,res)=>{
     const idValue = req.body.id
     const pwValue = req.body.pw
 
-    client.connect((err) => {
-        if (err) {
-            console.log(err)
-            res.send(err)
-            return
-        }
-
-    })
-
     const sql = "SELECT * FROM backend.userInfo WHERE userId = $1 AND userPw = $2"
     const values = [idValue,pwValue]
 
     client.query(sql,values, (err,data) => {
 
-        let isSuccess = {
+        let result = {
             "success" : true,
         }
 
-        if (err) {
-            console.log(err)
-            res.send(isSuccess)
-            return
-        }
+        const row = data.rows
+        if (row.length != 0){
+            result.success = true
+            
+            req.session.user = {
+                userId : idValue,
+                userPw : pwValue
+            }
 
+            res.send(result)
+        }
         else{
-            const row = data.rows
-            if (row.length != 0){
-                isSuccess.success = true
-                res.send(isSuccess)
-            }
-            else{
-                isSuccess.success = false
-                res.send(isSuccess)
-            }
+            result.success = false
+            res.send(result)
         }
     })
 })
