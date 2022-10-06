@@ -8,6 +8,8 @@ app.use(express.json()) // express에서 만든 json 해독기를 사용하겠�
 const pagesApi = require("./router/pages")
 const accountApi = require("./router/account")
 const postApi = require("./router/post")
+const commentApi = require("./router/comments")
+
 
 //내가 따로 분리시킨 api 를 등록
 app.use(session({
@@ -20,6 +22,7 @@ app.use(session({
 app.use("/",pagesApi)
 app.use("/",accountApi)
 app.use("/",postApi)
+app.use("/",commentApi)
 
 app.get('/logout', function (req, res, next) {
 

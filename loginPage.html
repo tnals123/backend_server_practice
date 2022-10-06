@@ -16,18 +16,16 @@
 
         const getSession = async () =>{
 
-            console.log("123132213131")
-
             const idValue = document.getElementById("idValue")
             const pwValue = document.getElementById("pwValue")
 
             const getSession = await fetch("/session",{
                 method : "GET"
             })
-        
+
             const response = await getSession.json()
 
-            if (response != undefined){
+            if (response.userId != undefined){
                 idValue.value = response.userId
                 pwValue.value = response.userPw
             }

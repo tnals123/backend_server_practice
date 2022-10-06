@@ -38,70 +38,114 @@ post.get("/post",(req,res) => {
 
 post.post("/post/detail",(req,res) => {
 
-    let connection = require('./database/maria')
-
     const postNum = req.body.postNum
 
-    let loginResult = maria.selectData(["postNum"],"postInfo")
-    connection.query(loginResult,[postNum],(err,result)=>{
+    let sql = "SELECT * FROM backend.userpost WHERE postnum = $1"
 
-        console.log(result)
+    client.query(sql,[postNum],(err,data) => {
 
-        let postObject = {postList : []}
-
-        for (let i = 0 ; i<result.length; i++){
-            postObject.postList.push(result[i])
+        let result = {
+            success : false,
+            posts : {}
         }
 
-        res.send(postObject)
+        if (err) {
+            console.log(err)
+            res.send(result)
+            return
+        }
+
+        else{
+            let rows = data.rows
+            result.success = true
+            result.posts = rows
+            res.send(result)
+        }
 
     })
 
+  
+
 })
 
-post.post("/post/write",(req,res)=>{
+post.post("/post",(req,res)=>{
     
     const idValue = req.body.idValue
     const postDate = req.body.postDate
     const postContents = req.body.postContents
 
-    maria.insertData(["postUserId","postContents","postDATE"],
-                     [idValue,postContents,postDate],"postInfo")
+    let sql = "INSERT INTO backend.userpost(userid,postdata,postcontents,postcomments) VALUES ($1,$2,$3,$4)"
 
-    let result = {
-    "success" : true,
-    }
+    client.query(sql,[idValue,postDate,postContents,{"comments" : []}], (err,data) => {
 
-    res.send(result)
+        let result = {
+            success : false,
+        }
+
+        if (err) {
+            console.log(err)
+            res.send(result)
+            return
+        }
+        else{
+            result.success = true
+            res.send(result)
+        }
+
+    })
 
 })
 
-post.delete("/post/delete",(req,res) => {
+post.delete("/post",(req,res) => {
 
     const postNum = req.body.postNum
+    console.log("삭제 시작")
 
-    maria.deleteData(["postNum"],[postNum],"postInfo")
+    let sql = "DELETE FROM backend.userpost WHERE postnum = $1"
 
-    let result = {
-        "success" : true,
-    }
+    client.query(sql,[postNum],(err,data)=>{
 
-    res.send(result)
+        let result = {
+            "success" : false,
+        }
 
+        if (err) {
+            result.success = false
+            res.send(result)
+            return
+        }
+        else{
+            result.success = true
+            res.send(result)
+        }
+
+    })
 })
 
-post.put("/post/update",(req,res) => {
+post.put("/post",(req,res) => {
 
     const newpostContents = req.body.newpostContents
     const postNum = req.body.postNum
 
-    maria.updataData(["postContents"],["postNum"],[newpostContents,postNum],"postInfo")
+    let sql = "UPDATE backend.userpost SET postcontents = $1 WHERE postnum = $2"
 
-    let result = {
-        "success" : true,
-    }
+    client.query(sql,[newpostContents,postNum],(err,data) => {
 
-    res.send(result)
+        let result = {
+            "success" : false,
+        }
+
+        if (err) {
+            result.success = false
+            res.send(result)
+            return
+        }
+        else{
+            result.success = true
+            res.send(result)
+        }
+
+    })
 
 })
 

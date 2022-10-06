@@ -1,31 +1,16 @@
 const account = require('express').Router()
 const client = require('../config/database')
 
-// //server.js 에서 봤을 때,회원정보 받기
-
-// account.get("/",(req,res) => {
-
-// })
-
-// //server.js 에서 봤을 때,회원가입
-
-// account.post("/",(req,res)=> {
-
-// })
-
-// //server.js 에서 봤을 때,로그인
-
-// account.post("/login",(req,res) => {
-
-// })
-
 account.get("/session",(req,res)=>{
-    console.log("zzzzz")
+    console.log("api시작!")
     if(req.session.user){
+        console.log("세션 존재")
         console.log(req.session.user)
         res.send(req.session.user)
     }
     else{
+        console.log("세션존재안함")
+        res.send({})
     }
 })
 
@@ -106,11 +91,13 @@ account.post("/account/login", (req,res)=>{
         const row = data.rows
         if (row.length != 0){
             result.success = true
+            console.log("로그인 성공")
             
             req.session.user = {
                 userId : idValue,
                 userPw : pwValue
             }
+            console.log("세션 삽입")
 
             res.send(result)
         }

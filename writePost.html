@@ -21,7 +21,7 @@
 
         const getSession = async () =>{
 
-            const getSession = await fetch("/confirmSession",{
+            const getSession = await fetch("/session",{
                 method : "GET"
             })
 
@@ -39,7 +39,7 @@
 
             const textValue = document.getElementById("textField").value
 
-            const writePost = await fetch("/post/writePost/write",{
+            const writePost = await fetch("/post",{
                 "method" : "POST",
                 "headers" : {
                     "Content-Type" : "application/json" 

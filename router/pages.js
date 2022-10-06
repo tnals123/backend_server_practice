@@ -15,7 +15,7 @@ router.get("/post/new",(req,res)=>{
 })
 
 router.get("/postDetail/:postNum",(req,res)=> {
-    res.sendFile(path.join(__dirname,'postDetailPage.html'))
+    res.sendFile(path.join(__dirname,'/../postDetailPage.html'))
 })
 
 router.get("/signUpPage",(req,res)=>{

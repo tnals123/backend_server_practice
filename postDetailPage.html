@@ -15,7 +15,21 @@
         <p id = "postContents"></p>
     </section>
 
+    <hr>
+
+    <footer>
+        <p style="text-align: left; margin-left: 400px;">댓글</p>
+        <section id = "commentsSection"> </section>
+        <textarea style="width: 600px" id = "commentsForm"></textarea>
+        <br>
+        <br>
+        <input id = "write" type="button" value="작성하기">
+        <br>
+    </footer>
+
     <script>
+
+        let postLength = 3
 
         const postUser = document.getElementById("postUser")
         const postDate = document.getElementById("postDate")
@@ -24,9 +38,25 @@
         const postNum = location.pathname.split('/')[location.pathname.split('/').length-1]
         console.log(postNum)
 
-        const getDetailPost = async () => {
+        const getSession = async () =>{
 
-            const getPost = await fetch("/post/getData/Detail",{
+            const getSession = await fetch("/session",{
+                method : "GET"
+            })
+
+            const response = await getSession.json()
+            console.log(response)
+
+            if (response != undefined){
+                console.log(response)
+                getDetailPost(response.userId)
+            }
+
+        }
+
+        const getDetailPost = async (userId) => {
+
+            const getPost = await fetch("/post/detail",{
                 "method" : "POST",
                 "headers" : {
                     "Content-Type" : "application/json" 
@@ -37,17 +67,132 @@
             })
 
             const response = await getPost.json()
-            console.log(response.postList[0])
+            console.log(response.posts)
 
-            postUser.innerHTML = "작성자 : " + response.postList[0].postUserId
-            postDate.innerHTML = "작성일 : " + response.postList[0].postDATE
-            postContents.innerHTML = "글 : " + response.postList[0].postContents
+            postUser.innerHTML = "작성자 : " + response.posts[0].userid
+            postDate.innerHTML = "작성일 : " + response.posts[0].postdata
+            postContents.innerHTML = "글 : " + response.posts[0].postcontents
 
             console.log(response)
+            const postcomments = response.posts[0].postcomments.comments
+
+            document.getElementById("write").onclick = () =>{
+                console.log("zzzzz")
+                postComment(userId,postcomments.length)
+            }
+
+            if (postcomments.length != 0) {
+                
+                let commentsSection = document.getElementById("commentsSection")
+
+                for (let i = 0 ; i<postcomments.length; i++){
+
+                    const newLine = document.createElement("br")
+                    let postFrame = document.createElement('p')
+                    let writerFrame = document.createElement('p')
+                    let deleteBtn = document.createElement('input')
+                    let alterBtn = document.createElement('input')
+                    let cancelBtn = document.createElement('input')
+                    let alterTextArea = document.createElement('textarea')
+                    let postUserNick = document.createTextNode(`작성자 : ${postcomments.userid}`)
+                    let postContent = document.createElement('p')
+                    let postDate = document.createTextNode(`\n${postcomments.postdate}`)
+
+                    postContent.innerHTML = `${postcomments[i].postcontents}`
+                    deleteBtn.type = 'button';
+                    deleteBtn.value = "X"
+                    deleteBtn.style = "color:white;border-radius : 22px; width : 30px; background : red; margin-left : 330px;"
+                    alterBtn.type = 'button';
+                    alterBtn.value = "수정"
+                    alterBtn.style = "color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                    cancelBtn.type = 'button';
+                    cancelBtn.value = "취소"
+                    cancelBtn.style = "display : none; color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                    alterTextArea.style = "display: none; position : absolute; width : 600px; right : 120px; height: 60px"
+                    alterTextArea.id = "alterTextArea"
+                    
+                    deleteBtn.onclick = () => {
+                        console.log(i)
+                        deletePost(response.posts[i].postnum)
+                    }
+
+                    cancelBtn.onclick = () => {
+                        alterTextArea.style = "display: none; position : absolute; width : 600px; right : 120px; height: 60px"
+                        cancelBtn.style = "display : none; color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                        alterBtn.value = "수정"
+
+                    }
+
+                    alterBtn.onclick = () => {
+                        if (alterBtn.value == "수정"){
+                            alterBtn.value = "적용"
+                            alterTextArea.style = "display: inline; position : absolute; width : 600px; right : 120px; height: 60px"
+                            cancelBtn.style = "display : inline; color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                        }
+                        else{
+                            let newpostContents = alterTextArea.value
+                            updatePost(newpostContents,response.posts[i].postnum)
+                        }
+
+                    }
+
+                    postFrame.style = "margin-left:auto; margin-right:auto; backgroundColor : grey; margin-bottom : 20px; padding : 10px 30px; width : 600px; box-shadow: 5px 5px 5px 5px gray; height : 120px "
+                    
+
+                    writerFrame.appendChild(postUserNick)
+                    if (userId == postcomments.userid){
+                        writerFrame.appendChild(deleteBtn)
+                        writerFrame.appendChild(alterBtn)
+                        writerFrame.appendChild(cancelBtn)
+                    }
+                    
+                    postFrame.appendChild(writerFrame)
+
+                    postFrame.appendChild(alterTextArea)
+
+                    postFrame.appendChild(newLine)
+                    postFrame.appendChild(postContent)
+
+                    commentsSection.appendChild(postFrame)
+
+                }
+
+            }
 
         }
 
-        getDetailPost()
+
+        const postComment = async (userId,postLength) => {
+
+            const textValue = document.getElementById("commentsForm").value
+
+            const writePost = await fetch("/comment",{
+                "method" : "POST",
+                "headers" : {
+                    "Content-Type" : "application/json" 
+                },
+                "body" : JSON.stringify({
+                    "commentNum" : postLength+1,
+                    "idValue" : userId,
+                    "postContents" : textValue,
+                    "postDate" : new Date().getHours() + "시" + new Date().getMinutes() + "분"
+                })
+            })
+
+            const response = await writePost.json()
+
+            if (response.success == true){
+                alert("게시글 작성!")
+                // location.href = "/makeSesstion"
+                location.href = "/postPage"
+            }
+
+        }
+
+        window.onload = async ()=>{
+            await getSession()
+            console.log(postLength)
+        }
 
     </script>
     
