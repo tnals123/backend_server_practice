@@ -33,7 +33,6 @@ post.get("/post",(req,res) => {
         }
 
     })
-
 })
 
 post.post("/post/detail",(req,res) => {
@@ -63,9 +62,6 @@ post.post("/post/detail",(req,res) => {
         }
 
     })
-
-  
-
 })
 
 post.post("/post",(req,res)=>{
@@ -93,7 +89,6 @@ post.post("/post",(req,res)=>{
         }
 
     })
-
 })
 
 post.delete("/post",(req,res) => {
@@ -146,7 +141,6 @@ post.put("/post",(req,res) => {
         }
 
     })
-
 })
 
 module.exports = post

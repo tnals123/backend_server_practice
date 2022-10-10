@@ -16,8 +16,6 @@ account.get("/session",(req,res)=>{
 
 account.post("/account/idCheck",(req,res) => {
 
-    console.log(session)
-
     const idValue = req.body.id
 
     const sql = "SELECT * FROM backend.userInfo WHERE userId = $1"
@@ -106,6 +104,22 @@ account.post("/account/login", (req,res)=>{
             res.send(result)
         }
     })
+})
+
+account.get('/account/logout', function (req, res, next) {
+
+    console.log("zzzzzzzz")
+
+    if((req.session.user)) {  
+        req.session.user = undefined
+    }
+
+    let result = {
+        "success" : true,
+    }
+
+    res.send(result)
+
 })
 
 module.exports = account

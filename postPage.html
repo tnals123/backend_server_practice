@@ -8,7 +8,7 @@
 </head>
 <body style="text-align: center">
     <h1>게시물 페이지입니다</h1>
-    <input type="button" value="로그아웃" onclick="location.href = '/logout'">
+    <input type="button" value="로그아웃" onclick=logout()>
     <input type="button" value="게시물 작성" onclick = writePost()>
     <section id = "mainSection" style="text-align: center">
 
@@ -174,11 +174,29 @@
 
         }
 
-        getSession()
+        const logout = async () => {
+
+            console.log("로그아웃")
+
+            const logout = await fetch("/account/logout",{
+                method : "GET"
+            })
+
+            const response = await logout.json()
+
+            if (response.success == true){
+                alert("로그아웃!")
+                location.href = "/loginPage"
+            }
+
+        }
 
         const writePost = () => {
             location.href = "/post/new"
         }
+
+        getSession()
+
     </script>
     
 </body>

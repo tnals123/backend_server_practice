@@ -29,8 +29,6 @@
 
     <script>
 
-        let postLength = 3
-
         const postUser = document.getElementById("postUser")
         const postDate = document.getElementById("postDate")
         const postContents = document.getElementById("postContents")
@@ -75,9 +73,11 @@
 
             console.log(response)
             const postcomments = response.posts[0].postcomments.comments
+            console.log(response.posts[0].postcomments.comments)
 
             document.getElementById("write").onclick = () =>{
                 console.log("zzzzz")
+                console.log(postcomments.length)
                 postComment(userId,postcomments.length)
             }
 
@@ -94,9 +94,9 @@
                     let alterBtn = document.createElement('input')
                     let cancelBtn = document.createElement('input')
                     let alterTextArea = document.createElement('textarea')
-                    let postUserNick = document.createTextNode(`작성자 : ${postcomments.userid}`)
+                    let postUserNick = document.createTextNode(`작성자 : ${postcomments[i].userid}`)
                     let postContent = document.createElement('p')
-                    let postDate = document.createTextNode(`\n${postcomments.postdate}`)
+                    let postDate = document.createTextNode(`\n${postcomments[i].postdate}`)
 
                     postContent.innerHTML = `${postcomments[i].postcontents}`
                     deleteBtn.type = 'button';
@@ -112,8 +112,9 @@
                     alterTextArea.id = "alterTextArea"
                     
                     deleteBtn.onclick = () => {
-                        console.log(i)
-                        deletePost(response.posts[i].postnum)
+                        console.log("삭제")
+                        console.log(postcomments[i].commentnum)
+                        deletePost(postcomments[i].commentnum)
                     }
 
                     cancelBtn.onclick = () => {
@@ -131,7 +132,7 @@
                         }
                         else{
                             let newpostContents = alterTextArea.value
-                            updatePost(newpostContents,response.posts[i].postnum)
+                            updatePost(postcomments[i].commentnum-1,userId,newpostContents)
                         }
 
                     }
@@ -140,7 +141,7 @@
                     
 
                     writerFrame.appendChild(postUserNick)
-                    if (userId == postcomments.userid){
+                    if (userId == postcomments[i].userid){
                         writerFrame.appendChild(deleteBtn)
                         writerFrame.appendChild(alterBtn)
                         writerFrame.appendChild(cancelBtn)
@@ -161,10 +162,36 @@
 
         }
 
+        const updatePost = async (commentNum,userId,newpostContents) => {
+
+            const postDelete = await fetch("/comment",{
+                "method" : "PUT",
+                "headers" : {
+                    "Content-Type" : "application/json" 
+                },
+                "body" : JSON.stringify({
+                    "commentNum" : commentNum,
+                    "idValue" : userId,
+                    "postContents" : newpostContents,
+                    "postDate" : new Date().getHours() + "시" + new Date().getMinutes() + "분"
+                })
+            })
+
+            const response = await postDelete.json()
+
+            if (response.success == true){
+                alert("수정!")
+                location.href = `/postDetail/${postNum}`
+            }
+
+        }
+
 
         const postComment = async (userId,postLength) => {
 
             const textValue = document.getElementById("commentsForm").value
+
+            console.log(postLength)
 
             const writePost = await fetch("/comment",{
                 "method" : "POST",
@@ -175,7 +202,8 @@
                     "commentNum" : postLength+1,
                     "idValue" : userId,
                     "postContents" : textValue,
-                    "postDate" : new Date().getHours() + "시" + new Date().getMinutes() + "분"
+                    "postDate" : new Date().getHours() + "시" + new Date().getMinutes() + "분",
+                    "postNum" : postNum
                 })
             })
 
@@ -184,14 +212,35 @@
             if (response.success == true){
                 alert("게시글 작성!")
                 // location.href = "/makeSesstion"
-                location.href = "/postPage"
+                location.href = `/postDetail/${postNum}`
             }
+
+        }
+
+        const deletePost = async (commentNum) => {
+
+        const postDelete = await fetch("/comment",{
+            "method" : "DELETE",
+            "headers" : {
+                "Content-Type" : "application/json" 
+            },
+            "body" : JSON.stringify({
+                "commentNum" : commentNum,
+                "postNum" : postNum
+            })
+        })
+
+        const response = await postDelete.json()
+
+        if (response.success == true){
+            alert("삭제 완료!")
+            location.href = `/postDetail/${postNum}`
+        }
 
         }
 
         window.onload = async ()=>{
             await getSession()
-            console.log(postLength)
         }
 
     </script>

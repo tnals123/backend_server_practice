@@ -24,18 +24,5 @@ app.use("/",accountApi)
 app.use("/",postApi)
 app.use("/",commentApi)
 
-app.get('/logout', function (req, res, next) {
-
-    if((req.session.user)) {  
-        req.session.user = undefined
-    }
-
-    res.sendFile(__dirname + "/index.html")
-})
-
-
-
-
-
 app.listen(3000, () => { 
     console.log ( "안녕" )})
