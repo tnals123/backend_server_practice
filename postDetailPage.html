@@ -170,10 +170,11 @@
                     "Content-Type" : "application/json" 
                 },
                 "body" : JSON.stringify({
-                    "commentNum" : commentNum,
+                    "commentNum" : commentNum+1,
                     "idValue" : userId,
                     "postContents" : newpostContents,
-                    "postDate" : new Date().getHours() + "시" + new Date().getMinutes() + "분"
+                    "postDate" : new Date().getHours() + "시" + new Date().getMinutes() + "분",
+                    "postNum" : postNum
                 })
             })
 

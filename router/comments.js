@@ -42,12 +42,32 @@ comments.put("/comment",(req,res)=>{
     const idValue = req.body.idValue
     const postDate = req.body.postDate
     const postContents = req.body.postContents
+    const postNum = req.body.postNum
 
     console.log(commentNum)
+    console.log(postContents)
 
-    let sql = `UPDATE backend.userpost
-    SET postcomments = jsonb_set(postcomments,'{comments}',  $1 ::jsonb , false) WHERE postcomments->comments`
-    client.query(sql,[{commentnum : commentNum, userid : idValue , postdate : postDate, postcontents : postContents}], (err,data) => {
+    let sql = `UPDATE 
+                    backend.userpost
+                SET
+                    postcomments = 
+                        jsonb_set(
+                            postcomments,
+                            array['comments', elem_index::text, 'postcontents'],
+                            $1::jsonb,
+                            true)
+                FROM (
+                    SELECT 
+                        pos- 1 as elem_index
+                    FROM 
+                        backend.userpost, 
+                        jsonb_array_elements(postcomments->'comments') with ordinality arr(elem, pos)
+                    WHERE
+                        elem->>'commentnum' = $2
+                    ) sub
+                    WHERE 
+                        postnum = $3; `
+    client.query(sql,['\"'+postContents+'\"',commentNum,postNum], (err,data) => {
 
         let result = {
             success : false,
