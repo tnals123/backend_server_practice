@@ -11,7 +11,6 @@ account.post("/accountNoSQL/login",(req,res)=>{
     }
 
     mongodb.connect("mongodb://localhost:27017",(err,database) => {
-        console.log("zzzzzzzzzzzz")
         if (err){
             console.log("에러!!!!")
             console.log(err)
@@ -29,8 +28,14 @@ account.post("/accountNoSQL/login",(req,res)=>{
                     console.log(err)
                 }
                 else{
-                    result.success = true
-                    console.log(data)
+                    if (data.length != 0){
+                        result.success = true
+                        console.log(data)
+                    }
+                    else{
+                        console.log(data.length)
+                        result.success = false
+                    }
                 }
                 res.send(result)
                 database.close()

@@ -50,8 +50,8 @@ app.use("/",postApi)
 app.use("/",commentApi)
 app.use("/",accountNoSQLApi)
 
-app.listen(3000, () => { 
+app.listen(3000,'0.0.0.0', () => { 
     console.log ( "안녕" )})
 
-https.createServer(options,app).listen(3443, () => { 
+https.createServer(options,app).listen(3443,'0.0.0.0', () => { 
     console.log ( "안녕2" )})

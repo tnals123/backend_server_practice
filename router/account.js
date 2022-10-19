@@ -1,16 +1,16 @@
 const account = require('express').Router()
 const client = require('../config/database')
+var requestIp = require('request-ip');
+let mongo = require('../modules/mongoController')();
 
 account.get("/session",(req,res)=>{
-    console.log("api시작!")
     if(req.session.user){
-        console.log("세션 존재")
-        console.log(req.session.user)
         res.send(req.session.user)
+        mongo.insertLogging(requestIp.getClientIp(req),req.session.user.userId,"/session",{},req.session.user,new Date())
     }
     else{
-        console.log("세션존재안함")
         res.send({})
+        mongo.insertLogging(requestIp.getClientIp(req),"None","/session",{},{},new Date())
     }
 })
 
@@ -20,6 +20,9 @@ account.post("/account/idCheck",(req,res) => {
 
     const sql = "SELECT * FROM backend.userInfo WHERE userId = $1"
     const values = [idValue]
+    const inputData = {
+        id : idValue
+    }
 
     client.query(sql,values, (err,data) => {
 
@@ -39,6 +42,8 @@ account.post("/account/idCheck",(req,res) => {
             res.send(result)
         }
 
+        mongo.insertLogging(requestIp.getClientIp(req),idValue,"/account/idCheck",inputData,result,new Date())
+
     })
 })
 
@@ -48,6 +53,13 @@ account.post("/account/resister",(req,res)=>{
     const pwValue = req.body.pwValue
     const userPhoneNumber = req.body.userPhoneNumber
     const userNickName = req.body.userNickName
+
+    const inputData = {
+        id : idValue,
+        password : pwValue,
+        userPhoneNumber : userPhoneNumber,
+        userNickName : userNickName
+    }
 
     const sql = "INSERT INTO backend.userInfo (userId,userPw,userPhoneNumber,userNickName) VALUES ($1,$2,$3,$4) "
     const values =[idValue,pwValue,userPhoneNumber,userNickName]
@@ -68,6 +80,9 @@ account.post("/account/resister",(req,res)=>{
             result.success = true
             res.send(result)
         }
+
+        mongo.insertLogging(requestIp.getClientIp(req),idValue,"/account/resister",inputData,result,new Date())
+
     })
     
 })
@@ -79,6 +94,10 @@ account.post("/account/login", (req,res)=>{
 
     const sql = "SELECT * FROM backend.userInfo WHERE userId = $1 AND userPw = $2"
     const values = [idValue,pwValue]
+    const inputData = {
+        id : idValue,
+        password : pwValue
+    }
 
     client.query(sql,values, (err,data) => {
 
@@ -89,26 +108,28 @@ account.post("/account/login", (req,res)=>{
         const row = data.rows
         if (row.length != 0){
             result.success = true
-            console.log("로그인 성공")
             
             req.session.user = {
                 userId : idValue,
                 userPw : pwValue
             }
-            console.log("세션 삽입")
-
             res.send(result)
         }
         else{
             result.success = false
             res.send(result)
         }
+
+        mongo.insertLogging(requestIp.getClientIp(req),idValue,"/account/login",inputData,result,new Date())
+
     })
 })
 
-account.get('/account/logout', function (req, res, next) {
+account.get("/account/logout", function (req, res, next) {
 
     console.log("zzzzzzzz")
+
+    const userId = req.session.user.userId
 
     if((req.session.user)) {  
         req.session.user = undefined
@@ -119,6 +140,8 @@ account.get('/account/logout', function (req, res, next) {
     }
 
     res.send(result)
+
+    mongo.insertLogging(requestIp.getClientIp(req),userId,"/account/logout",{},result,new Date())
 
 })
 

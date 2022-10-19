@@ -1,5 +1,7 @@
 const comments = require('express').Router()
 const client = require('../config/database')
+var requestIp = require('request-ip');
+let mongo = require('../modules/mongoController')();
 
 comments.post("/comment",(req,res)=>{
     
@@ -8,6 +10,13 @@ comments.post("/comment",(req,res)=>{
     const postDate = req.body.postDate
     const postContents = req.body.postContents
     const postNum = req.body.postNum
+    const inputData = {
+        commentNum : commentNum,
+        id : idValue,
+        postDate : postDate,
+        postContents : postContents,
+        postNum : postNum
+    }
 
     console.log(commentNum)
 
@@ -25,11 +34,13 @@ comments.post("/comment",(req,res)=>{
         if (err) {
             console.log(err)
             res.send(result)
+            mongo.insertLogging(requestIp.getClientIp(req),idValue,"/post/comment",inputData,result,new Date())
             return
         }
         else{
             result.success = true
             res.send(result)
+            mongo.insertLogging(requestIp.getClientIp(req),idValue,"/post/comment",inputData,result,new Date())
         }
 
     })
@@ -43,6 +54,13 @@ comments.put("/comment",(req,res)=>{
     const postDate = req.body.postDate
     const postContents = req.body.postContents
     const postNum = req.body.postNum
+    const inputData = {
+        commentNum : commentNum,
+        id : idValue,
+        postDate : postDate,
+        postContents : postContents,
+        postNum : postNum
+    }
 
     console.log(commentNum)
     console.log(postContents)
@@ -67,6 +85,7 @@ comments.put("/comment",(req,res)=>{
                     ) sub
                     WHERE 
                         postnum = $3; `
+
     client.query(sql,['\"'+postContents+'\"',commentNum,postNum], (err,data) => {
 
         let result = {
@@ -76,11 +95,13 @@ comments.put("/comment",(req,res)=>{
         if (err) {
             console.log(err)
             res.send(result)
+            mongo.insertLogging(requestIp.getClientIp(req),idValue,"/put/comment",inputData,result,new Date())
             return
         }
         else{
             result.success = true
             res.send(result)
+            mongo.insertLogging(requestIp.getClientIp(req),idValue,"/put/comment",inputData,result,new Date())
         }
 
     })
@@ -91,6 +112,10 @@ comments.delete("/comment",(req,res)=>{
     
     const commentNum = req.body.commentNum
     const postNum = req.body.postNum
+    const inputData = {
+        commentNum : commentNum,
+        postNum : postNum
+    }
 
     console.log(commentNum)
 
@@ -127,6 +152,7 @@ comments.delete("/comment",(req,res)=>{
                     else{
                         result.success = true
                         res.send(result)
+                        mongo.insertLogging(requestIp.getClientIp(req),req.session.user.userId,"/delete/comment",inputData,result,new Date())
                     }
                 
                 })
@@ -135,6 +161,7 @@ comments.delete("/comment",(req,res)=>{
             else{
                 result.success = true
                 res.send(result)
+                mongo.insertLogging(requestIp.getClientIp(req),req.session.user.userId,"/delete/comment",inputData,result,new Date())
             }
     
         })
