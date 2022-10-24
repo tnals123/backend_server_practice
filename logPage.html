@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<style>
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+
+      /* 숨기기 */
+      z-index: -1;
+      opacity: 0;
+    }
+
+    .show {
+      opacity: 1;
+      z-index: 1000;
+      transition: all 0.5s;
+    }
+
+    .window {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .popup {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #ffffff;
+      box-shadow: 0 2px 7px rgba(0, 0, 0, 0.3);
+
+      /* 임시 지정 */
+      width: 400px;
+      height: 400px;
+
+      /* 초기에 약간 아래에 배치 */
+      transform: translate(-50%, -40%);
+    }
+
+    .show .popup {
+      transform: translate(-50%, -50%);
+      transition: all 0.5s;
+    }
+  </style>
+<body>
+
+    <button id="show">세부 설정</button>
+    <div id = "log" style="width : 1200px; font-size : 11px"></div>
+    <div class="background">
+      <div class="window">
+        <div class="popup">
+            <table>
+                <tr>
+                    <td>
+                        이름
+                    </td>
+                    <td>
+                        <input id = "userId" type="text">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        api 이름
+                    </td>
+                    <td>
+                        <input id = "apiName" type="text">
+                    </td>
+                </tr>
+            </table>
+            <div class="double">
+                <input id="datepicker1" type="text"> -
+                <input id="datepicker2" type="text">
+            </div>
+            <button style="position: absolute; left: 30%; bottom : 10px" id="close">취소</button>
+            <button style="position: absolute; left: 55%; bottom : 10px" id="close">적용</button>
+        </div>
+        <div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+
+
+    <script>
+        
+
+        const getAllLog = async ()=>{
+
+            const result = await fetch("/log", {
+                "method" : "POST",
+                "headers" : {
+                    "Content-Type" : "application/json" // 내가 보내줄 값이 json 형태다!!,
+                },
+                "body" : JSON.stringify({
+                    //api 에서 id, pw 라고 적어놨기 때문에
+                    "userId" : "asdf",
+                    "apiName" : "",
+                    "timeRange" : "",
+                    "timeSort" : ""
+                })   
+
+            })
+        
+            const response = await result.json()
+            
+            console.log(response)
+
+            for (let i = 0 ; i <response.length; i++){
+                document.getElementById("log").innerHTML +=  "유저 아이피 : " + response[i].userIp
+                + ",  유저 아이디 : " + response[i].userId + ",  api 명 : " + response[i].apiName
+                + ",   api 작동 시간 : " + response[i].loggingTime  + ",   input데이터 : " + JSON.stringify(response[i].inputData)
+                + ",  output 데이터 : " + JSON.stringify(response[i].outputData)
+                + "<br>";
+            }
+
+        }
+
+        window.onload = async () => {
+            await getAllLog()
+        }
+
+        function show() {
+            document.querySelector(".background").className = "background show";
+        }
+
+        function close() {
+            document.querySelector(".background").className = "background";
+        }
+
+        document.querySelector("#show").addEventListener("click", show);
+        document.querySelector("#close").addEventListener("click", close);
+
+    </script>
+    
+</body>
+</html>
+
+
+

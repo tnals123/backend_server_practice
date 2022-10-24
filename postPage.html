@@ -10,27 +10,42 @@
     <h1>게시물 페이지입니다</h1>
     <input type="button" value="로그아웃" onclick=logout()>
     <input type="button" value="게시물 작성" onclick = writePost()>
+    <input id = "logging" style="display: none;" type = "button" value = "로그 보기" onclick = "loggingPost()">
     <section id = "mainSection" style="text-align: center">
 
     </section>
 
     <script>
 
-        const getSession = async () =>{
-
-            console.log("함수 시작")
+        const loggingPost = async () => {
 
             const getSession = await fetch("/session",{
                 method : "GET"
             })
 
-            console.log("api 호출")
+            const response = await getSession.json()
+
+            if (response.userId != "asdf"){
+                alert("권한이 없습니다.")
+            }
+            else{
+                location.href = "/logPage"
+            }
+        }
+
+        const getSession = async () =>{
+
+            const getSession = await fetch("/session",{
+                method : "GET"
+            })
 
             const response = await getSession.json()
-            console.log(response)
 
             if (response != undefined){
                 console.log(response)
+                if (response.userId == "asdf"){
+                    document.getElementById("logging").style.display = "inline";
+                }
                 getAllPost(response.userId)
             }
 

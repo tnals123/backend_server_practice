@@ -1,7 +1,9 @@
 const mongodb = require("mongodb").MongoClient
 
 module.exports = () => {
+
     return {
+
       insertLogging : (userIp,userId,apiName,inputData,outputData,loggingTime) => {
 
         mongodb.connect("mongodb://localhost:27017",(err,database) => {
@@ -10,6 +12,7 @@ module.exports = () => {
                 console.log(err)
                 res.send(result)
             }
+            
             else{
 
                 const logObject = {
@@ -27,10 +30,40 @@ module.exports = () => {
                         console.log(err)
                     }
                     else{
-                        console.log("성공")
                         console.log(data)
                     }
                     
+                    database.close()
+                })
+            }
+        })
+
+      },
+
+      getLogging : (parameterArray,callback) => {
+
+        mongodb.connect("mongodb://localhost:27017",(err,database) => {
+
+            if (err){
+                console.log(err)
+                res.send(result)
+            }
+            
+            else{
+
+                var json = JSON.parse(parameterArray);
+                console.log(json.timeSort)
+
+                database.db("stageus").collection("logging").find(json).sort({"loggingTime" : 1}).toArray((err,data) => {
+            
+                    if (err){
+                        result.success = false
+                        console.log(err)
+                    }
+                    else{
+                        console.log("송공!!!")
+                        return callback(data)
+                    }
                     database.close()
                 })
             }

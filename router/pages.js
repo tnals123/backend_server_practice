@@ -76,4 +76,11 @@ router.get("/postPage",(req,res)=>{
     res.sendFile(path.join(__dirname + "/../postPage.html"))
 })
 
+router.get("/logPage" , (req,res) => {
+
+    mongo.insertLogging(requestIp.getClientIp(req),req.session.user.userId,"/logPage",{},{},new Date())
+
+    res.sendFile(path.join(__dirname + "/../logPage.html"))
+})
+
 module.exports = router
