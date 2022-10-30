@@ -40,7 +40,7 @@ module.exports = () => {
 
       },
 
-      getLogging : (parameterArray,callback) => {
+      getLogging : (parameterArray,timeRange,timeSort,callback) => {
 
         mongodb.connect("mongodb://localhost:27017",(err,database) => {
 
@@ -52,20 +52,47 @@ module.exports = () => {
             else{
 
                 var json = JSON.parse(parameterArray);
-                console.log(json.timeSort)
+                console.log(json)
+                console.log(timeRange);
 
-                database.db("stageus").collection("logging").find(json).sort({"loggingTime" : 1}).toArray((err,data) => {
+                if (timeRange != ""){
+
+                    let timeJson = {
+                        "loggingTime": {"$gte": new Date(timeRange.start), "$lt": new Date(timeRange.end)}
+                    }
+                    let resultJson = Object.assign(json,timeJson)
+
+                    database.db("stageus").collection("logging").find(resultJson).sort({"loggingTime" : timeSort}).toArray((err,data) => {
             
-                    if (err){
-                        result.success = false
-                        console.log(err)
-                    }
-                    else{
-                        console.log("송공!!!")
-                        return callback(data)
-                    }
-                    database.close()
-                })
+                        if (err){
+                            result.success = false
+                            console.log(err)
+                        }
+                        else{
+                            console.log("송공!!!")
+                            return callback(data)
+                        }
+                        database.close()
+                    })
+
+                }
+                else{
+
+                    database.db("stageus").collection("logging").find(json).sort({"loggingTime" : timeSort}).toArray((err,data) => {
+            
+                        if (err){
+                            result.success = false
+                            console.log(err)
+                        }
+                        else{
+                            console.log("송공!!!")
+                            return callback(data)
+                        }
+                        database.close()
+                    })
+
+                }
+
             }
         })
 

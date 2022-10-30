@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
 
 <style>
@@ -44,7 +47,7 @@
       box-shadow: 0 2px 7px rgba(0, 0, 0, 0.3);
 
       /* 임시 지정 */
-      width: 400px;
+      width: 500px;
       height: 400px;
 
       /* 초기에 약간 아래에 배치 */
@@ -80,13 +83,33 @@
                         <input id = "apiName" type="text">
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        날짜 범위
+                    </td>
+                    <td>
+                        <input type="text" name="mb_11" id="mb_11" class="ts" autocomplete="off"/>
+                    </td>
+                    <td>
+                        ~
+                    </td>
+                    <td>
+                        <input type="text" name="mb_12" id="mb_12" class="ts" autocomplete="off"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        오름차순<input id = "sort" name="timeType" type="radio">
+                    </td>
+                    <td>
+                        내림차순<input name="timeType" type="radio">
+                    </td>
+                </tr>
             </table>
-            <div class="double">
-                <input id="datepicker1" type="text"> -
-                <input id="datepicker2" type="text">
-            </div>
+            <br>
+            <br>
             <button style="position: absolute; left: 30%; bottom : 10px" id="close">취소</button>
-            <button style="position: absolute; left: 55%; bottom : 10px" id="close">적용</button>
+            <button style="position: absolute; left: 55%; bottom : 10px" id="apply">적용</button>
         </div>
         <div>
           <div></div>
@@ -100,6 +123,8 @@
 
         const getAllLog = async ()=>{
 
+            document.getElementById("sort").checked = true
+
             const result = await fetch("/log", {
                 "method" : "POST",
                 "headers" : {
@@ -110,7 +135,7 @@
                     "userId" : "asdf",
                     "apiName" : "",
                     "timeRange" : "",
-                    "timeSort" : ""
+                    "timeSort" : "1"
                 })   
 
             })
@@ -129,6 +154,77 @@
 
         }
 
+        const getSpecLog = async () => {
+
+            document.getElementById("log").innerHTML = "";
+
+            var userId = document.getElementById("userId").value
+            var apiName = document.getElementById("apiName").value
+            var mb_11 = document.getElementById("mb_11").value
+            var mb_12 = document.getElementById("mb_12").value
+            var radioButtons = $("input:radio[name='timeType']");
+            var selectedIndex = radioButtons.index(radioButtons.filter(':checked'));
+            let mbJson
+            let timeType
+
+            try {
+                mbJson = {start : new Date(mb_11).toISOString(), end : new Date(mb_12).toISOString()}
+            } catch (error) {
+                if (mb_11 != "" && mb_12 == ""){
+                    mbJson = {start : new Date(mb_11).toISOString(), end : new Date().toISOString()}
+                }
+                else if (mb_11 == "" && mb_12 != ""){
+                    mbJson = {start : new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(), end : new Date().toISOString()}
+                }
+                else{
+                    mbJson = ""
+                }
+            }
+
+            console.log(mbJson)
+
+
+            if (selectedIndex == 0){
+                timeType = 1
+            }
+            else{
+                timeType = -1
+            }
+
+            const result = await fetch("/log", {
+                "method" : "POST",
+                "headers" : {
+                    "Content-Type" : "application/json" // 내가 보내줄 값이 json 형태다!!,
+                },
+                "body" : JSON.stringify({
+                    //api 에서 id, pw 라고 적어놨기 때문에
+                    "userId" : userId,
+                    "apiName" : apiName,
+                    "timeRange" : mbJson,
+                    "timeSort" : timeType
+                })   
+
+            })
+        
+            const response = await result.json()
+            
+            console.log(response)
+
+            if (response.length == 0){
+                document.getElementById("log").innerHTML = "검색결과가 없습니다."
+            }
+            else{
+                for (let i = 0 ; i <response.length; i++){
+                    document.getElementById("log").innerHTML +=  "유저 아이피 : " + response[i].userIp
+                    + ",  유저 아이디 : " + response[i].userId + ",  api 명 : " + response[i].apiName
+                    + ",   api 작동 시간 : " + response[i].loggingTime  + ",   input데이터 : " + JSON.stringify(response[i].inputData)
+                    + ",  output 데이터 : " + JSON.stringify(response[i].outputData)
+                    + "<br>";
+                }
+            }
+
+        }
+
         window.onload = async () => {
             await getAllLog()
         }
@@ -141,8 +237,35 @@
             document.querySelector(".background").className = "background";
         }
 
+        function apply() {
+            document.querySelector(".background").className = "background";
+            getSpecLog();
+        }
+
         document.querySelector("#show").addEventListener("click", show);
         document.querySelector("#close").addEventListener("click", close);
+        document.querySelector("#apply").addEventListener("click", apply);
+
+        $(function(){
+
+            $('#mb_11').datepicker({
+                lang:'ko',
+                dateFormat: 'yy-mm-dd',
+                monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'], //달력의 월 부분 텍스트
+                monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'], //달력의 월 부분 Tooltip
+                dayNamesMin: ['일','월','화','수','목','금','토'], //달력의 요일 텍스트
+                dayNames: ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'] //달력의 요일 Tooltip
+            });
+            $('#mb_12').datepicker({
+                lang:'ko',
+                dateFormat: 'yy-mm-dd',
+                monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'], //달력의 월 부분 텍스트
+                monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'], //달력의 월 부분 Tooltip
+                dayNamesMin: ['일','월','화','수','목','금','토'], //달력의 요일 텍스트
+                dayNames: ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'] //달력의 요일 Tooltip
+            });
+
+        })
 
     </script>
     

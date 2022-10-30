@@ -31,7 +31,6 @@ app.get("*",(req,res,next) => {
 
 const pagesApi = require("./router/pages")
 const accountApi = require("./router/account")
-const accountNoSQLApi = require("./router/accountNoSQL")
 const postApi = require("./router/post")
 const mongoApi = require("./router/mongoDB")
 const commentApi = require("./router/comments")
@@ -49,7 +48,6 @@ app.use("/",pagesApi)
 app.use("/",accountApi)
 app.use("/",postApi)
 app.use("/",commentApi)
-app.use("/",accountNoSQLApi)
 app.use("/",mongoApi)
 
 app.listen(3000,'0.0.0.0', () => { 

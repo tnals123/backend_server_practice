@@ -8,8 +8,8 @@ mongoRouter.post("/log", (req,res)=>{
     const timeRange = req.body.timeRange
     const timeSort = req.body.timeSort
 
-    let arr = [userId,apiName,timeRange,timeSort]
-    let parameterArr = ["userId", "apiName", "timeRange", "timeSort"]
+    let arr = [userId,apiName]
+    let parameterArr = ["userId", "apiName"]
     let parNum = 0;
     let num = 0;
 
@@ -36,7 +36,7 @@ mongoRouter.post("/log", (req,res)=>{
 
     json += '}'
 
-     mongo.getLogging(json, (data) => {
+     mongo.getLogging(json,timeRange,timeSort, (data) => {
         res.send(data)
      })
 

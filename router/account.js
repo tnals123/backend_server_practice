@@ -2,6 +2,7 @@ const account = require('express').Router()
 const client = require('../config/database')
 var requestIp = require('request-ip');
 let mongo = require('../modules/mongoController')();
+let accountForm = require('../modules/signUpController')();
 
 account.get("/session",(req,res)=>{
     if(req.session.user){
@@ -34,7 +35,7 @@ account.post("/account/idCheck",(req,res) => {
         if (row.length != 0){
             //아이디가 이미 존재
             result.success = true
-            res.send(result)
+            return res.send(result)
         }
         else{
             //아이디가 존재하지 않음
@@ -54,6 +55,28 @@ account.post("/account/resister",(req,res)=>{
     const userPhoneNumber = req.body.userPhoneNumber
     const userNickName = req.body.userNickName
 
+    let result = {
+        success : "",
+        errorCode : ""
+    }
+
+    accountForm.checkSignUpForm(idValue,pwValue,userPhoneNumber,userNickName, (data) => {
+        if (data != "통과"){
+            console.log(data)
+            result.success = false
+            result.errorCode = data
+            console.log(result)
+            return res.send(result)
+        }
+        else{
+            result.success = true
+        }
+     })
+
+     if (result.success == false){
+        return
+     }
+
     const inputData = {
         id : idValue,
         password : pwValue,
@@ -67,14 +90,15 @@ account.post("/account/resister",(req,res)=>{
     client.query(sql,values,(err,data) => {
         
         let result = {
-            success : false
+            success : false,
+            errorCode : ""
         }
 
         if (err) {
             console.log(err)
             result.success = false
-            res.send(result)
-            return
+            result.errorCode = "아이디 중복"
+            return res.send(result)
         }
         else{
             result.success = true

@@ -82,16 +82,39 @@
                     })
 
                     const response = await signUp.json()
+                    console.log(response)
 
                     if (response.success == true){
                         alert("회원가입을 완료하셨습니다.")
                         location.href = "/"
                     }
                     else {
-                        alert("중복된 아이디입니다")
-                        idCheck = false
-                        document.getElementById("idValue").value = ""
-                        
+
+                        if (response.errorCode == "아이디 형식 오류"){
+                            alert("아이디는 대소문자를 포함한 4~12자여야 합니다.")
+                            idCheck = false
+                            document.getElementById("idValue").value = ""
+                        }
+                        else if (response.errorCode == "비밀번호 형식 오류"){
+                            alert("비밀번호는 특수문자, 대소문자를 포함한 8~20자여야 합니다.")
+                            document.getElementById("pwValue").value = ""
+                        }
+                        else if (response.errorCode == "전화번호 형식 오류"){
+                            alert("전화번호는 숫자만 입력해주세요.")
+                            document.getElementById("phoneNum").value = ""
+                        }
+                        else if (response.errorCode == "닉네임 형식 오류"){
+                            alert("닉네임 형식이 잘못되었습니다.")
+                            document.getElementById("nickNameValue").value = ""
+                        }
+                        else if (response.errorCode == "빈칸 오류"){
+                            alert("빈 서식을 입력해 주세요")
+                        }
+                        else if (response.errorCode == "아이디 중복"){
+                            alert("중복된 아이디입니다")
+                            idCheck = false
+                            document.getElementById("idValue").value = ""
+                        }
                     }
                 }
             }
