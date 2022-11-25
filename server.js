@@ -1,6 +1,18 @@
 const express = require("express")
 const session = require('express-session')
+const bodyParser = require('body-parser');
+const multer = require('multer');
 const app = express() 
+app.use(express.urlencoded({    
+    limit:"50mb",
+    extended: false
+}));
+app.use(express.json({   
+ limit : "50mb"
+}));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(express.json()) // express에서 만든 json 해독기를 사용하겠다
 //json 해독기를 먼저 사용한 후 -> api 등록을 해 주어야 한다.

@@ -13,7 +13,7 @@ router.get("/" , (req,res) => {
         mongo.insertLogging(requestIp.getClientIp(req),"None","/",{},{},new Date())
     }
 
-    res.sendFile(path.join(__dirname + "/../index.html"))
+    res.sendFile(path.join(__dirname + "/../public/html/index.html"))
 })
 
 router.get("/loginPage",(req,res)=>{
@@ -25,7 +25,7 @@ router.get("/loginPage",(req,res)=>{
         mongo.insertLogging(requestIp.getClientIp(req),"None","/loginPage",{},{},new Date())
     }
 
-    res.sendFile(path.join(__dirname + "/../loginPage.html"))
+    res.sendFile(path.join(__dirname + "/../public/html/loginPage.html"))
 })
 
 router.get("/post/new",(req,res)=>{
@@ -37,7 +37,8 @@ router.get("/post/new",(req,res)=>{
         mongo.insertLogging(requestIp.getClientIp(req),"None","/post/new",{},{},new Date())
     }
 
-    res.sendFile(path.join(__dirname + "/../writePost.html"))
+    res.sendFile(path.join(__dirname + "/../public/html/writePost.html"))
+
 })
 
 router.get("/postDetail/:postNum",(req,res)=> {
@@ -49,7 +50,7 @@ router.get("/postDetail/:postNum",(req,res)=> {
         mongo.insertLogging(requestIp.getClientIp(req),"None","/postDetail/:postNum",{},{},new Date())
     }
 
-    res.sendFile(path.join(__dirname,'/../postDetailPage.html'))
+    res.sendFile(path.join(__dirname,'/../public/html/postDetailPage.html'))
 })
 
 router.get("/signUpPage",(req,res)=>{
@@ -61,7 +62,7 @@ router.get("/signUpPage",(req,res)=>{
         mongo.insertLogging(requestIp.getClientIp(req),"None","/signUpPage",{},{},new Date())
     }
 
-    res.sendFile(path.join(__dirname + "/../signUpPage.html"))
+    res.sendFile(path.join(__dirname + "/../public/html/signUpPage.html"))
 })
 
 router.get("/postPage",(req,res)=>{
@@ -73,14 +74,14 @@ router.get("/postPage",(req,res)=>{
         mongo.insertLogging(requestIp.getClientIp(req),"None","/postPage",{},{},new Date())
     }
 
-    res.sendFile(path.join(__dirname + "/../postPage.html"))
+    res.sendFile(path.join(__dirname + "/../public/html/postPage.html"))
 })
 
 router.get("/logPage" , (req,res) => {
 
     mongo.insertLogging(requestIp.getClientIp(req),req.session.user.userId,"/logPage",{},{},new Date())
 
-    res.sendFile(path.join(__dirname + "/../logPage.html"))
+    res.sendFile(path.join(__dirname + "/../public/html/logPage.html"))
 })
 
 module.exports = router

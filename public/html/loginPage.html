@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>로그인페이지 입니다</h1>
+    <input id = "idValue" type="text">
+    <input id = "pwValue" type="text">
+    <input type="button" value="로그인" onclick="loginEvent()">
+    <script>
+
+        const loginEvent = async ()=>{
+            const idValue = document.getElementById("idValue").value
+            const pwValue = document.getElementById("pwValue").value
+            console.log(idValue)
+
+            const result = await fetch("/account/login", {
+                "method" : "POST",
+                "headers" : {
+                    "Content-Type" : "application/json" // 내가 보내줄 값이 json 형태다!!,
+                },
+                "body" : JSON.stringify({
+                    //api 에서 id, pw 라고 적어놨기 때문에
+                    "id" : idValue,
+                    "pw" : pwValue
+                })   
+
+            })
+        
+            const response = await result.json()
+            //쿠키 업그레이드 버전. 크기제한이 없다. 개수제한이 없다. 
+            localStorage.setItem("Token",response.token)
+            
+            if (response.success == true){
+                alert("로그인 성공!")
+                // location.href = "/makeSesstion"
+                location.href = "/postPage"
+            }
+            else {
+                alert("로그인 실패!")
+                location.href = "/loginPage"
+            }
+
+            // //get 하는 법
+            // const result2 = await fetch("/account")
+        }
+
+        const loginEvent2 = async ()=>{
+            const idValue = document.getElementById("idValue").value
+            const pwValue = document.getElementById("pwValue").value
+            console.log(idValue)
+
+            const result = await fetch("/accountNoSQL/login", {
+                "method" : "POST",
+                "headers" : {
+                    "Content-Type" : "application/json" // 내가 보내줄 값이 json 형태다!!,
+                },
+                "body" : JSON.stringify({
+                    //api 에서 id, pw 라고 적어놨기 때문에
+                    "id" : idValue,
+                    "pw" : pwValue
+                })   
+
+            })
+        
+            const response = await result.json()
+            console.log(response)
+            
+            if (response.success == true){
+                alert("로그인 성공!")
+                // location.href = "/makeSesstion"
+                location.href = "/postPage"
+            }
+            else {
+                alert("로그인 실패!")
+                location.href = "/loginPage"
+            }
+
+            // //get 하는 법
+            // const result2 = await fetch("/account")
+        }
+
+        window.onload = async () => {
+            if (localStorage.getItem("Token")){
+
+                const result = await fetch("/account/verify", {
+                "method" : "POST",
+                "headers" : {
+                    "Content-Type" : "application/json" // 내가 보내줄 값이 json 형태다!!,
+                },
+                "body" : JSON.stringify({
+                    //api 에서 id, pw 라고 적어놨기 때문에
+                    "token" : localStorage.getItem("Token")
+                })   
+
+            })
+
+            const response = await result.json()
+            if (response.success == true){
+                location.href = "/postPage"
+            }
+
+            }
+        }
+
+        // getSession()
+
+    </script>
+    
+</body>
+</html>

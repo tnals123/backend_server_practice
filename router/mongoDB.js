@@ -1,7 +1,7 @@
-const mongoRouter = require('express').Router()
+const router = require('express').Router()
 let mongo = require('../modules/mongoController')();
 
-mongoRouter.post("/log", (req,res)=>{
+router.post("/log", (req,res)=>{
 
     const userId = req.body.userId
     const apiName = req.body.apiName
@@ -43,4 +43,4 @@ mongoRouter.post("/log", (req,res)=>{
 })
 
 
-module.exports = mongoRouter
+module.exports = router

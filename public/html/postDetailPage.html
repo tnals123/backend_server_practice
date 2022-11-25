@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="text-align: center">
+    <h1>게시물 상세보기</h1>
+
+    <section>
+        <p id = "postUser"></p>
+        <p id = "postDate"></p>
+        <p id = "postContents"></p>
+        <p id = "image"></p>
+    </section>
+
+    <hr>
+
+    <footer>
+        <p style="text-align: left; margin-left: 400px;">댓글</p>
+        <section id = "commentsSection"> </section>
+        <textarea style="width: 600px" id = "commentsForm"></textarea>
+        <br>
+        <br>
+        <input id = "write" type="button" value="작성하기">
+        <br>
+    </footer>
+
+    <script>
+
+        const postUser = document.getElementById("postUser")
+        const postDate = document.getElementById("postDate")
+        const postContents = document.getElementById("postContents")
+
+        const postNum = location.pathname.split('/')[location.pathname.split('/').length-1]
+        console.log(postNum)
+
+        const getDetailPost = async () => {
+
+            const getPost = await fetch("/post/detail",{
+                "method" : "POST",
+                "headers" : {
+                    "Authorization" : localStorage.getItem("Token"),
+                    "Content-Type" : "application/json" 
+                },
+                "body" : JSON.stringify({
+                    "postNum" : postNum,
+                })
+            })
+
+            const response = await getPost.json()
+
+            if (response.error == "토큰 오류"){
+                alert("권한이 없습니다.")
+                location.href = "/loginPage"
+            }
+
+            console.log(response.posts)
+
+            postUser.innerHTML = "작성자 : " + response.userId
+            postDate.innerHTML = "작성일 : " + response.posts[0].postdata
+            postContents.innerHTML = "글 : " + response.posts[0].postcontents
+            if (response.posts[0].imagepath != []){
+                let image = document.getElementById("image")
+                for (let i = 0 ; i<response.posts[0].imagepath.length; i++){
+                    console.log(response.posts[0].imagepath[i])
+                    var img = document.createElement('img')
+                    img.style.width = "300px"
+                    img.style.height = "300px"
+                    img.src = `https://soomin.s3.ap-northeast-1.amazonaws.com/${response.posts[0].imagepath[i]}`
+                    image.appendChild(img)
+                }
+            }
+
+            console.log(response)
+            const postcomments = response.posts[0].postcomments.comments
+            console.log(response.posts[0].postcomments.comments)
+
+            document.getElementById("write").onclick = () =>{
+                console.log("zzzzz")
+                console.log(postcomments.length)
+                postComment(response.userId,postcomments.length)
+            }
+
+            if (postcomments.length != 0) {
+                
+                let commentsSection = document.getElementById("commentsSection")
+
+                for (let i = 0 ; i<postcomments.length; i++){
+
+                    const newLine = document.createElement("br")
+                    let postFrame = document.createElement('p')
+                    let writerFrame = document.createElement('p')
+                    let deleteBtn = document.createElement('input')
+                    let alterBtn = document.createElement('input')
+                    let cancelBtn = document.createElement('input')
+                    let alterTextArea = document.createElement('textarea')
+                    let postUserNick = document.createTextNode(`작성자 : ${postcomments[i].userid}`)
+                    let postContent = document.createElement('p')
+                    let postDate = document.createTextNode(`\n${postcomments[i].postdate}`)
+
+                    postContent.innerHTML = `${postcomments[i].postcontents}`
+                    deleteBtn.type = 'button';
+                    deleteBtn.value = "X"
+                    deleteBtn.style = "color:white;border-radius : 22px; width : 30px; background : red; margin-left : 330px;"
+                    alterBtn.type = 'button';
+                    alterBtn.value = "수정"
+                    alterBtn.style = "color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                    cancelBtn.type = 'button';
+                    cancelBtn.value = "취소"
+                    cancelBtn.style = "display : none; color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                    alterTextArea.style = "display: none; position : absolute; width : 600px; right : 120px; height: 60px"
+                    alterTextArea.id = "alterTextArea"
+                    
+                    deleteBtn.onclick = () => {
+                        console.log("삭제")
+                        if (response.error == "토큰 오류"){
+                            alert("권한이 없습니다.")
+                            location.href = "/loginPage"
+                        }
+
+                        else if (response.error == "다른 기기 로그인"){
+                            alert("다른 기기로 로그인하셨습니다.")
+                            localStorage.removeItem("Token")
+                            location.href = "/loginPage"
+                        }
+
+                        else{
+                            deletePost(postcomments[i].commentnum)
+                        }
+                    }
+
+                    cancelBtn.onclick = () => {
+
+                        if (response.error == "토큰 오류"){
+                            alert("권한이 없습니다.")
+                            location.href = "/loginPage"
+                        }
+
+                        else if (response.error == "다른 기기 로그인"){
+                            alert("다른 기기로 로그인하셨습니다.")
+                            localStorage.removeItem("Token")
+                            location.href = "/loginPage"
+                        }
+
+                        else{
+                            alterTextArea.style = "display: none; position : absolute; width : 600px; right : 120px; height: 60px"
+                            cancelBtn.style = "display : none; color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                            alterBtn.value = "수정"
+                        }
+                    }
+
+                    alterBtn.onclick = () => {
+
+                        if (response.error == "토큰 오류"){
+                            alert("권한이 없습니다.")
+                            location.href = "/loginPage"
+                        }
+
+                        else if (response.error == "다른 기기 로그인"){
+                            alert("다른 기기로 로그인하셨습니다.")
+                            localStorage.removeItem("Token")
+                            location.href = "/loginPage"
+                        }
+
+                        else{
+
+                            if (alterBtn.value == "수정"){
+                            alterBtn.value = "적용"
+                            alterTextArea.style = "display: inline; position : absolute; width : 600px; right : 120px; height: 60px"
+                            cancelBtn.style = "display : inline; color:black;border-radius : 22px; width : 50px; background : white; margin-left : 10px; border : solid 1px black"
+                            }
+                            else{
+                                let newpostContents = alterTextArea.value
+                                updatePost(postcomments[i].commentnum-1,response.userId,newpostContents)
+                            }
+                        }
+
+                    }
+
+                    postFrame.style = "margin-left:auto; margin-right:auto; backgroundColor : grey; margin-bottom : 20px; padding : 10px 30px; width : 600px; box-shadow: 5px 5px 5px 5px gray; height : 120px "
+                    
+
+                    writerFrame.appendChild(postUserNick)
+                    if (response.userId == postcomments[i].userid){
+                        writerFrame.appendChild(deleteBtn)
+                        writerFrame.appendChild(alterBtn)
+                        writerFrame.appendChild(cancelBtn)
+                    }
+                    
+                    postFrame.appendChild(writerFrame)
+
+                    postFrame.appendChild(alterTextArea)
+
+                    postFrame.appendChild(newLine)
+                    postFrame.appendChild(postContent)
+
+                    commentsSection.appendChild(postFrame)
+
+                }
+
+            }
+
+        }
+
+        const updatePost = async (commentNum,userId,newpostContents) => {
+
+            const postDelete = await fetch("/comment",{
+                "method" : "PUT",
+                "headers" : {
+                    "Authorization" : localStorage.getItem("Token"),
+                    "Content-Type" : "application/json" 
+                },
+                "body" : JSON.stringify({
+                    "commentNum" : commentNum+1,
+                    "idValue" : userId,
+                    "postContents" : newpostContents,
+                    "postDate" : new Date().getHours() + "시" + new Date().getMinutes() + "분",
+                    "postNum" : postNum
+                })
+            })
+
+            const response = await postDelete.json()
+
+            if (response.error == "토큰 오류"){
+                alert("권한이 없습니다.")
+                location.href = "/loginPage"
+            }
+
+            else if (response.error == "다른 기기 로그인"){
+                alert("다른 기기로 로그인하셨습니다.")
+                localStorage.removeItem("Token")
+                location.href = "/loginPage"
+            }
+
+            if (response.success == true){
+                alert("수정!")
+                location.href = `/postDetail/${postNum}`
+            }
+
+        }
+
+
+        const postComment = async (userId,postLength) => {
+
+            const textValue = document.getElementById("commentsForm").value
+
+            console.log(postLength)
+
+            const writePost = await fetch("/comment",{
+                "method" : "POST",
+                "headers" : {
+                    "Authorization" : localStorage.getItem("Token"),
+                    "Content-Type" : "application/json" 
+                },
+                "body" : JSON.stringify({
+                    "commentNum" : postLength+1,
+                    "idValue" : userId,
+                    "postContents" : textValue,
+                    "postDate" : new Date().getHours() + "시" + new Date().getMinutes() + "분",
+                    "postNum" : postNum
+                })
+            })
+
+            const response = await writePost.json()
+
+            if (response.error == "토큰 오류"){
+                alert("권한이 없습니다.")
+                location.href = "/loginPage"
+            }
+
+            else if (response.error == "다른 기기 로그인"){
+                alert("다른 기기로 로그인하셨습니다.")
+                localStorage.removeItem("Token")
+                location.href = "/loginPage"
+            }
+
+            if (response.success == true){
+                alert("댓글 작성!")
+                // location.href = "/makeSesstion"
+                location.href = `/postDetail/${postNum}`
+            }
+
+        }
+
+        const deletePost = async (commentNum) => {
+
+        const postDelete = await fetch("/comment",{
+            "method" : "DELETE",
+            "headers" : {
+                "Authorization" : localStorage.getItem("Token"),
+                "Content-Type" : "application/json" 
+            },
+            "body" : JSON.stringify({
+                "commentNum" : commentNum,
+                "postNum" : postNum
+            })
+        })
+
+        const response = await postDelete.json()
+
+        if (response.error == "토큰 오류"){
+            alert("권한이 없습니다.")
+            localStorage.removeItem("Token")
+            location.href = "/loginPage"
+        }
+
+        else if (response.error == "다른 기기 로그인"){
+            alert("다른 기기로 로그인하셨습니다.")
+            localStorage.removeItem("Token")
+            location.href = "/loginPage"
+        }
+
+        if (response.success == true){
+            alert("삭제 완료!")
+            location.href = `/postDetail/${postNum}`
+        }
+
+        }
+
+        window.onload = async ()=>{
+            await getDetailPost()
+        }
+
+    </script>
+    
+</body>
+</html>

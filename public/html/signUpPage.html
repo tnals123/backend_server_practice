@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="text-align: center">
+    <h1>회원가입 페이지입니다</h1>
+
+    <table style= "margin-left: auto; margin-right: auto;">
+        <tr>
+            <td>
+                <span>아이디  </span>
+            </td>
+            <td>
+                <input type="text" id="idValue">
+            </td>
+            <td>
+                <input type="button" id="idValueCheck" value="아이디 중복 체크" onclick="checkIdValue()">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span>비밀번호  </span>
+            </td>
+            <td>
+                <input type="text" id="pwValue">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span>전화번호  </span>
+            </td>
+            <td>
+            </span><input type="text" id="phoneNum">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span>닉네임  </span>
+            </td>
+            <td>
+            </span><input type="text" id="nickNameValue">
+            </td>
+         </tr>
+
+        </tr>
+    </table>
+    <br>
+        <input type="button" value="가입하기" onclick = signUp()>
+
+        <script>
+
+            let idCheck = false;
+
+            const signUp = async () => {
+
+                if (idCheck == false){
+                    alert("아이디 중복 체크를 하지 않으셨습니다.")
+                }
+
+                else{
+
+                    const idValue = document.getElementById("idValue").value
+                    const pwValue = document.getElementById("pwValue").value
+                    const phoneNumValue = document.getElementById("phoneNum").value
+                    const nickNameValue = document.getElementById("nickNameValue").value
+
+                    const signUp = await fetch("/account/resister",{
+                        "method" : "POST",
+                        "headers" : {
+                            "Content-Type" : "application/json" 
+                        },
+                        "body" : JSON.stringify({
+                            "idValue" : idValue,
+                            "pwValue" : pwValue,
+                            "userPhoneNumber" : phoneNumValue,
+                            "userNickName" : nickNameValue
+                        })
+                    })
+
+                    const response = await signUp.json()
+                    console.log(response)
+
+                    if (response.success == true){
+                        alert("회원가입을 완료하셨습니다.")
+                        location.href = "/"
+                    }
+                    else {
+
+                        if (response.errorCode == "아이디 형식 오류"){
+                            alert("아이디는 대소문자를 포함한 4~12자여야 합니다.")
+                            idCheck = false
+                            document.getElementById("idValue").value = ""
+                        }
+                        else if (response.errorCode == "비밀번호 형식 오류"){
+                            alert("비밀번호는 특수문자, 대소문자를 포함한 8~20자여야 합니다.")
+                            document.getElementById("pwValue").value = ""
+                        }
+                        else if (response.errorCode == "전화번호 형식 오류"){
+                            alert("전화번호는 숫자만 입력해주세요.")
+                            document.getElementById("phoneNum").value = ""
+                        }
+                        else if (response.errorCode == "닉네임 형식 오류"){
+                            alert("닉네임 형식이 잘못되었습니다.")
+                            document.getElementById("nickNameValue").value = ""
+                        }
+                        else if (response.errorCode == "빈칸 오류"){
+                            alert("빈 서식을 입력해 주세요")
+                        }
+                        else if (response.errorCode == "아이디 중복"){
+                            alert("중복된 아이디입니다")
+                            idCheck = false
+                            document.getElementById("idValue").value = ""
+                        }
+                    }
+                }
+            }
+
+            const checkIdValue = async () => {
+
+                const idValue = document.getElementById("idValue")
+
+                const idCheckResult = await fetch("/account/idCheck",{
+                    "method" : "POST",
+                    "headers" : {
+                        "Content-Type" : "application/json" 
+                    },
+                    "body" : JSON.stringify({
+                        "id" : idValue.value,
+                    })
+                })
+
+                const response = await idCheckResult.json()
+
+                if (response.success == true){
+                    alert("중복된 아이디입니다.")
+                    idCheck = false
+                    idValue.value = ""
+                }
+                else{
+                    alert("사용 가능한 아이디입니다.")
+                    idCheck = true
+                }
+
+            }
+        </script>
+    
+</body>
+</html>

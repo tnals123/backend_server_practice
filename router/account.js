@@ -1,24 +1,31 @@
-const account = require('express').Router()
+const router = require('express').Router()
 const client = require('../config/database')
+const jwt = require('jsonwebtoken')
 var requestIp = require('request-ip');
 let mongo = require('../modules/mongoController')();
 let accountForm = require('../modules/signUpController')();
 
-account.get("/session",(req,res)=>{
-    if(req.session.user){
-        res.send(req.session.user)
-        mongo.insertLogging(requestIp.getClientIp(req),req.session.user.userId,"/session",{},req.session.user,new Date())
+const secretKey = "HANDSOMEGUYSOOMINANDGYONGCHAN"
+
+router.post("/account/verify", (req,res) => {
+    const token = req.body.token
+    const result = {
+        "success" : false
     }
-    else{
-        res.send({})
-        mongo.insertLogging(requestIp.getClientIp(req),"None","/session",{},{},new Date())
+    try{
+        jwt.verify(token,secretKey)
+        result.success = true
+        res.send(result)
+    }
+    catch(e){
+        console.log(e)
     }
 })
 
-account.post("/account/idCheck",(req,res) => {
+
+router.post("/account/idCheck",(req,res) => {
 
     const idValue = req.body.id
-
     const sql = "SELECT * FROM backend.userInfo WHERE userId = $1"
     const values = [idValue]
     const inputData = {
@@ -48,7 +55,7 @@ account.post("/account/idCheck",(req,res) => {
     })
 })
 
-account.post("/account/resister",(req,res)=>{
+router.post("/account/resister",(req,res)=>{
 
     const idValue = req.body.idValue
     const pwValue = req.body.pwValue
@@ -111,7 +118,7 @@ account.post("/account/resister",(req,res)=>{
     
 })
 
-account.post("/account/login", (req,res)=>{
+router.post("/account/login", (req,res)=>{
 
     const idValue = req.body.id
     const pwValue = req.body.pw
@@ -127,16 +134,42 @@ account.post("/account/login", (req,res)=>{
 
         let result = {
             "success" : true,
+            "token" : null
         }
 
         const row = data.rows
         if (row.length != 0){
             result.success = true
+
+            //token 생성
+            const token = jwt.sign(
+                {
+                    id : row[0].userid,
+                },
+                //특정한 secret 키
+                secretKey,
+                {
+                    "expiresIn" : "24h",
+                    "issuer" : "stageus"
+                }
+            )
+
+            //userinfo 에 토큰 변경
+
+            const sql = "UPDATE backend.userinfo SET usertoken = $1 WHERE userId = $2"
+
+            client.query(sql,[token,row[0].userid],(err,data) => {
+        
+                if (err) {
+                    console.log(err)
+                }
+        
+            })
+
+            result.token = token
+
+            console.log(result)
             
-            req.session.user = {
-                userId : idValue,
-                userPw : pwValue
-            }
             res.send(result)
         }
         else{
@@ -149,15 +182,7 @@ account.post("/account/login", (req,res)=>{
     })
 })
 
-account.get("/account/logout", function (req, res, next) {
-
-    console.log("zzzzzzzz")
-
-    const userId = req.session.user.userId
-
-    if((req.session.user)) {  
-        req.session.user = undefined
-    }
+router.get("/account/logout", function (req, res, next) {
 
     let result = {
         "success" : true,
@@ -169,4 +194,4 @@ account.get("/account/logout", function (req, res, next) {
 
 })
 
-module.exports = account
+module.exports = router

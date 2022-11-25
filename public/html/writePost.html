@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="text-align: center">
+    <h1>게시물 작성</h1>
+        <input id="imageFile" multiple type="file" accept=".jpg, .png">
+        <button onclick="uploadImage()">이미지 업로드</button>
+    <textarea id = "textField" style="text-align: center; width:600px; height: 300px;">
+
+    </textarea>
+
+    <br>
+
+    <input type="button" value="게시물 작성" onclick="idCheckResult()" >
+
+    <script>
+
+
+        const uploadImage = async () => {
+            const imageFile = document.querySelector('#imageFile').files
+            const formData = new FormData();
+
+            for(let i = 0; i < imageFile.length; i++){
+                console.log(imageFile[i])
+                formData.append(`Image`,imageFile[i]);
+            }   
+
+            const uploadImage = await fetch("/image",{
+                    "method" : "POST",
+                    "body" : formData
+                })
+
+            console.log(uploadImage)
+        }
+        
+        const idCheckResult = async () => {
+            
+            let isImgCount = false
+            let isText = false
+
+            const imgFiles = document.querySelector('#imageFile').files
+            const textValue = document.getElementById("textField").value
+            const imageFile = document.querySelector('#imageFile').files
+            const formData = new FormData();
+
+            if (imageFile.length <= 4){
+                console.log("1")
+                isImgCount = true
+            }
+            if (textValue != ""){
+                console.log("2")
+                isText = true
+            }
+
+            if (!isImgCount){
+                alert("이미지 파일은 4개 이하로 입력 가능합니다.")
+            }
+            else if (!isText){
+                alert("게시물 내용을 작성해 주세요")
+            }
+            else{
+
+                for(let i = 0; i < imageFile.length; i++){
+                    console.log(imageFile[i])
+                    formData.append(`Image`,imageFile[i]);
+                }   
+
+                formData.append("postContents",textValue)
+                formData.append("postDate",new Date().getHours() + "시" + new Date().getMinutes() + "분")
+
+                const writePost = await fetch("/post",{
+                    headers : {
+                        Authorization : localStorage.getItem("Token")
+                    },
+                    "method" : "POST",
+                    "body" : formData
+                })
+
+                const response = await writePost.json()
+
+                if (response.error == "토큰 오류"){
+                    alert("권한이 없습니다.")
+                    location.href = "/loginPage"
+                }
+
+                else if (response.error == "다른 기기 로그인"){
+                    alert("다른 기기로 로그인하셨습니다.")
+                    localStorage.removeItem("Token")
+                    location.href = "/loginPage"
+                }
+                
+                if (response.success == true){
+                    alert("게시글 작성!")
+                    location.href = "/postPage"
+                }
+
+            }
+
+        }
+
+
+
+    </script>
+    
+</body>
+</html>

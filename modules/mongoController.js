@@ -10,7 +10,7 @@ module.exports = () => {
 
             if (err){
                 console.log(err)
-                res.send(result)
+                return
             }
             
             else{
@@ -46,7 +46,7 @@ module.exports = () => {
 
             if (err){
                 console.log(err)
-                res.send(result)
+                return
             }
             
             else{
