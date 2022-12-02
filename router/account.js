@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 var requestIp = require('request-ip');
 let mongo = require('../modules/mongoController')();
 let accountForm = require('../modules/signUpController')();
+let redis = require('../modules/redisController')();
 
 const secretKey = "HANDSOMEGUYSOOMINANDGYONGCHAN"
 
@@ -22,6 +23,25 @@ router.post("/account/verify", (req,res) => {
     }
 })
 
+router.get("/account/loginCount", (req,res) => {
+    const result = {
+        "success" : false,
+        "count" : null,
+        "errer" : null
+    }
+
+    try{
+        redis.getLoginCount((data) => {
+            result.count = data.messege
+            result.success = true
+            res.send(result)
+        })
+    }
+    catch(e){
+        result.errer = e
+        res.send(result)
+    }
+})
 
 router.post("/account/idCheck",(req,res) => {
 
@@ -141,6 +161,17 @@ router.post("/account/login", (req,res)=>{
         if (row.length != 0){
             result.success = true
 
+            //redis에 로그인 추가
+            redis.updateLoginCount(idValue, (data) => {
+                console.log(data)
+                
+                //현재 세션을 redis에 저장
+                console.log("저장!")
+                redis.storeSession(req.session.id,(data) => {
+                    console.log(data)
+                })
+            })
+
             //token 생성
             const token = jwt.sign(
                 {
@@ -190,7 +221,7 @@ router.get("/account/logout", function (req, res, next) {
 
     res.send(result)
 
-    mongo.insertLogging(requestIp.getClientIp(req),userId,"/account/logout",{},result,new Date())
+    mongo.insertLogging(requestIp.getClientIp(req),"","/account/logout",{},result,new Date())
 
 })
 

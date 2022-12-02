@@ -53,7 +53,7 @@
             const response = await getPost.json()
 
             if (response.error == "토큰 오류"){
-                alert("권한이 없습니다.")
+                alert("다른 기기로 로그인하셨습니다.")
                 location.href = "/loginPage"
             }
 
@@ -79,7 +79,6 @@
             console.log(response.posts[0].postcomments.comments)
 
             document.getElementById("write").onclick = () =>{
-                console.log("zzzzz")
                 console.log(postcomments.length)
                 postComment(response.userId,postcomments.length)
             }

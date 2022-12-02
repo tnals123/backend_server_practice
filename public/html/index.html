@@ -11,6 +11,26 @@
     <p style="text-align: center">
         <input type="button" value="로그인 페이지로 이동" onclick="loginPageEvent()">
         <input type="button" value="회원가입 페이지로 이동" onclick="resisterPageEvent()">
+        <h1>심심풀이 클리커</h1>
+        <input type="button" value="숫자 증가" onclick="clickerEvent()">
+        <p id="number">
+        <h1>카드</h1>
+        <div>
+            <span>마우스</span>
+            <input type="button" value="plus" onclick="increseEvent('마우스')">
+            <input type="button" value="minus" onclick="decreseEvent('마우스')">
+        </div>
+        <div>
+            <span>GET</span>
+            <input type="button" onclick="getData()">
+        </div>
+        <div>
+            <span>키보드</span>
+            <input type="button" value="plus" onclick="increseEvent('키보드')">
+            <input type="button" value="minus" onclick="decreseEvent('키보드')">
+        </div>
+        <input type="button" value="삭제" onclick="deleteData()">
+
     </p>
     <script>
         const loginPageEvent = () => {
@@ -19,6 +39,72 @@
         const resisterPageEvent = () => {
             location.href = "/signUpPage"
         }
+        const clickerEvent = async() => {
+            const response = await fetch("/clicker", {
+                "method" : "POST",
+            })
+            const response2 = await fetch("/clicker", {
+                "method" : "GET",
+            })
+            const result = await response.json()
+            if (result.success){
+                console.log(result.data)
+            }
+            const result2 = await response2.json()
+            if (result2.success){
+                document.getElementById("number").innerHTML = result2.data
+            }
+        }
+        const increseEvent = async (itmeName) => {
+            const response = await fetch("/cart/increase", {
+                "method" : "POST",
+                "headers" : {
+                    "Content-Type" : "application/json"
+                },
+                "body" : JSON.stringify({
+                    "item_name" : itmeName
+                })
+            })
+            const result = await response.json()
+            if (result.success){
+                console.log(result.messege)
+            }
+
+        }
+        const decreseEvent = async (itmeName) => {
+            const response = await fetch("/cart/decrease", {
+                "method" : "POST",
+                "headers" : {
+                    "Content-Type" : "application/json"
+                },
+                "body" : JSON.stringify({
+                    "item_name" : itmeName
+                })
+            })
+            const result = await response.json()
+            if (result.success){
+                console.log(result.messege)
+            }
+        }
+        const getData = async () => {
+            const response = await fetch("/cart", {
+                "method" : "GET",
+            })
+            const result = await response.json()
+            if (result.success){
+                console.log(result.messege)
+            }
+        }
+        const deleteData = async () => {
+            const response = await fetch("/cart", {
+                "method" : "DELETE",
+            })
+            const result = await response.json()
+            if (result.success){
+                console.log(result.messege)
+            }
+        }
+
     </script>
 </body>
 </html>
